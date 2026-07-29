@@ -1,0 +1,11 @@
+version: "3"
+services:
+  cowrie:
+    image: cowrie/cowrie:latest
+    restart: unless-stopped
+    ports:
+      - "22:2222"     # public port 22 -> cowrie's internal fake ssh
+      - "2223:2223"   # telnet
+    volumes:
+      - ./cowrie-log:/cowrie/cowrie-git/var/log/cowrie
+      - ./cowrie-data:/cowrie/cowrie-git/var/lib/cowrie
