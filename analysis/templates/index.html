@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Honeypot Dashboard</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: #0d1117;
+            color: #c9d1d9;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            padding: 40px;
+        }
+
+        h1 {
+            color: #58a6ff;
+            margin-bottom: 8px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            color: #8b949e;
+            margin-bottom: 32px;
+            font-size: 14px;
+        }
+
+        .stats-row {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 20px 28px;
+            flex: 1;
+        }
+
+        .stat-card .number {
+            font-size: 32px;
+            font-weight: 700;
+            color: #58a6ff;
+        }
+
+        .stat-card .label {
+            color: #8b949e;
+            font-size: 13px;
+            margin-top: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-card.success .number { color: #3fb950; }
+        .stat-card.failed .number { color: #f85149; }
+
+        .panels {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .panel {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 24px;
+        }
+
+        .panel h2 {
+            font-size: 16px;
+            color: #c9d1d9;
+            margin-bottom: 16px;
+            border-bottom: 1px solid #30363d;
+            padding-bottom: 12px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        td {
+            padding: 8px 0;
+            font-size: 14px;
+            border-bottom: 1px solid #21262d;
+        }
+
+        td:first-child {
+            color: #c9d1d9;
+            font-family: 'Consolas', monospace;
+        }
+
+        td:last-child {
+            text-align: right;
+            color: #58a6ff;
+            font-weight: 600;
+        }
+
+        .commands td:first-child {
+            max-width: 400px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Honeypot Dashboard</h1>
+    <div class="subtitle">Cowrie SSH/Telnet honeypot — live attack data</div>
+
+    <div class="stats-row">
+        <div class="stat-card">
+            <div class="number">{{ total_attempts }}</div>
+            <div class="label">Total Attempts</div>
+        </div>
+        <div class="stat-card success">
+            <div class="number">{{ total_success }}</div>
+            <div class="label">Successful Logins</div>
+        </div>
+        <div class="stat-card failed">
+            <div class="number">{{ total_failed }}</div>
+            <div class="label">Failed Logins</div>
+        </div>
+    </div>
+
+    <div class="panels">
+
+        <div class="panel">
+            <h2>Top Usernames</h2>
+            <table>
+                {% for username, count in usernames %}
+                <tr><td>{{ username }}</td><td>{{ count }}</td></tr>
+                {% endfor %}
+            </table>
+        </div>
+
+        <div class="panel">
+            <h2>Top Passwords</h2>
+            <table>
+                {% for password, count in passwords %}
+                <tr><td>{{ password }}</td><td>{{ count }}</td></tr>
+                {% endfor %}
+            </table>
+        </div>
+
+        <div class="panel">
+            <h2>Top Source IPs</h2>
+            <table>
+                {% for ip, count in ips %}
+                <tr><td>{{ ip }}</td><td>{{ count }}</td></tr>
+                {% endfor %}
+            </table>
+        </div>
+
+        <div class="panel">
+            <h2>Attempts by Hour (UTC)</h2>
+            <table>
+                {% for hour, count in hours %}
+                <tr><td>{{ hour }}:00</td><td>{{ count }}</td></tr>
+                {% endfor %}
+            </table>
+        </div>
+
+        <div class="panel" style="grid-column: span 2;">
+            <h2>Top Commands</h2>
+            <table class="commands">
+                {% for command, count in commands %}
+                <tr><td>{{ command }}</td><td>{{ count }}</td></tr>
+                {% endfor %}
+            </table>
+        </div>
+
+    </div>
+
+</body>
+</html>
