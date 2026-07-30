@@ -19,7 +19,7 @@ def get_db():
         database=DB_NAME
     )
 
-def create_heatmap():
+def create_heatmap(db):
     cursor = db.cursor()
     points = []
 
@@ -53,8 +53,8 @@ def create_heatmap():
 @app.route("/")
 def home():
 
-    map_html = create_heatmap()
     db = get_db()
+    map_html = create_heatmap(db)
 
 
     return render_template(
