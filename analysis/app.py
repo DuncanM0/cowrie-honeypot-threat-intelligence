@@ -11,12 +11,13 @@ from config import DB_HOST, DB_USER, DB_PASSWORD, DB_NAME
 
 app = Flask(__name__)
 
-db = mysql.connector.connect(
-    host=DB_HOST,
-    user=DB_USER,
-    password=DB_PASSWORD,
-    database=DB_NAME
-)
+def get_db():
+    return mysql.connector.connect(
+        host=DB_HOST,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        database=DB_NAME
+    )
 
 def create_heatmap():
     cursor = db.cursor()
@@ -51,6 +52,8 @@ def create_heatmap():
 
 @app.route("/")
 def home():
+    db = get_db()
+
     map_html = create_heatmap()
 
 
