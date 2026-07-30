@@ -36,8 +36,3 @@ It includes a Python pipeline to pull logs from the VPS into a MySQL database, a
    ```bash
    cd analysis
    python app.py
-<<<<<<< HEAD
-   ```
-=======
-   ```
->>>>>>> 2ca2113 (Simplify README documentation)
