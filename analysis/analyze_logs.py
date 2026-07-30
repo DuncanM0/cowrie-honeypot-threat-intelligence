@@ -53,7 +53,6 @@ def insert_login(db, data):
     db.commit()
 
 
-
 def insert_command(db, data):
     cursor = db.cursor()
     cursor.execute(
