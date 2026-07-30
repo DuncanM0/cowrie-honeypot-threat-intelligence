@@ -52,9 +52,9 @@ def create_heatmap():
 
 @app.route("/")
 def home():
-    db = get_db()
 
     map_html = create_heatmap()
+    db = get_db()
 
 
     return render_template(
