@@ -19,6 +19,10 @@
             font-size: 28px;
         }
 
+        h2 {
+            text-align: center;
+        }
+
         .subtitle {
             color: #8b949e;
             margin-bottom: 32px;
@@ -105,6 +109,18 @@
             text-overflow: ellipsis;
             white-space: nowrap;
         }
+
+        .map-container {
+            margin: 0 auto;
+            padding: 0;
+            width: 1200px;
+            max-width: 100%;
+            height: 800px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
     </style>
 </head>
 <body>
@@ -125,6 +141,12 @@
             <div class="number">{{ total_failed }}</div>
             <div class="label">Failed Logins</div>
         </div>
+    </div>
+
+    <h2>Attack Locations</h2>
+
+    <div class="map-container">
+        {{ map_html | safe }}
     </div>
 
     <div class="panels">
