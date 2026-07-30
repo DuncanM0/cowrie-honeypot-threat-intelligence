@@ -46,8 +46,8 @@ def count_values(data, key):
 def insert_login(db, data):
     cursor = db.cursor()
     cursor.execute(
-        "INSERT IGNORE INTO login_attempts (session_id, src_ip, timestamp, username, password, status) VALUES (%s, %s, %s, %s, %s, %s)",
-        (data["session"], data["ip"], data["time"], data["username"], data["password"], data["status"])
+        "INSERT IGNORE INTO login_attempts (session_id, src_ip, timestamp, username, password, status, country, city, lat, lon) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+        (data["session"], data["ip"], data["time"], data["username"], data["password"], data["status"],  data["country"], data["city"], data["lat"], data["lon"])
         )
     cursor.close()
     db.commit()
@@ -175,7 +175,11 @@ if __name__ == "__main__":
                     "time": sql_time,
                     "username": event["username"],
                     "password": event.get("password", ""),
-                    "status": "success"
+                    "status": "success",
+                    "country": None,
+                    "city": None,
+                    "lat": None,
+                    "lon": None
                     })
 
                 
@@ -199,7 +203,11 @@ if __name__ == "__main__":
                     "time": sql_time,
                     "username": event["username"],
                     "password": event.get("password", ""),
-                    "status": "failed"
+                    "status": "failed",
+                    "country": None,
+                    "city": None,
+                    "lat": None,
+                    "lon": None
                     })
 
                 
