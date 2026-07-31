@@ -87,5 +87,10 @@ if __name__ == "__main__":
     while True:
         fetch_latest_log()
         parse_and_store()
+
+        with open("last_updated.txt", "w") as f:
+            f.write(datetime.now().isoformat())
+        print("Recoring Time ... \n")
+        
         print("Sleeping for 5 minutes...\n")
         time.sleep(300)  # 5 mins 

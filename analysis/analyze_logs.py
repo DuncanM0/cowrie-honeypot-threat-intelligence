@@ -100,6 +100,14 @@ def get_top_commands(db):
     cursor.close()
     return results
 
+def get_top_countries(db):
+    cursor = db.cursor()
+    cursor.execute(
+        "SELECT country, COUNT(*) as attempts FROM login_attempts GROUP BY country ORDER BY attempts DESC LIMIT 10"
+    )
+    results = cursor.fetchall()
+    cursor.close()
+    return results
 
 def get_attempts_by_hour(db):
     cursor = db.cursor()

@@ -23,12 +23,6 @@
             text-align: center;
         }
 
-        .subtitle {
-            color: #8b949e;
-            margin-bottom: 32px;
-            font-size: 14px;
-        }
-
         .stats-row {
             display: flex;
             gap: 16px;
@@ -121,12 +115,21 @@
             align-items: center;
         }
 
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
     </style>
 </head>
 <body>
 
-    <h1>Honeypot Dashboard</h1>
-    <div class="subtitle">Cowrie SSH/Telnet honeypot — live attack data</div>
+    <div class="header">
+        <h1>Honeypot Dashboard</h1>
+        <span id="last-updated">loading...</span>
+    </div>
 
     <div class="stats-row">
         <div class="stat-card">
@@ -142,6 +145,8 @@
             <div class="label">Failed Logins</div>
         </div>
     </div>
+
+    
 
     <h2>Attack Locations</h2>
 
@@ -159,6 +164,7 @@
                 {% endfor %}
             </table>
         </div>
+        
 
         <div class="panel">
             <h2>Top Passwords</h2>
@@ -174,6 +180,15 @@
             <table>
                 {% for ip, count in ips %}
                 <tr><td>{{ ip }}</td><td>{{ count }}</td></tr>
+                {% endfor %}
+            </table>
+        </div>
+
+        <div class="panel">
+            <h2>Top Countries</h2>
+            <table>
+                {% for country, count in countries %}
+                <tr><td>{{ country }}</td><td>{{ count }}</td></tr>
                 {% endfor %}
             </table>
         </div>
@@ -197,6 +212,28 @@
         </div>
 
     </div>
+
+
+<script>
+let lastTime;
+
+fetch("/last-updated").then(r => r.text()).then(t => lastTime = new Date(t));
+
+setInterval(() => {
+    if (!lastTime) return;
+    let seconds = Math.floor((new Date() - lastTime) / 1000);
+    document.getElementById("last-updated").textContent = "Last Updated " + seconds + "s ago";
+
+    if (seconds >= 300) {
+        location.reload();
+    }
+}, 1000);
+
+setInterval(() => {
+    fetch("/last-updated").then(r => r.text()).then(t => lastTime = new Date(t));
+}, 10000);
+
+</script>
 
 </body>
 </html>

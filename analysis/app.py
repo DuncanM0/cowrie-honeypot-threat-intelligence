@@ -5,7 +5,8 @@ from folium.plugins import HeatMap
 from analyze_logs import (
     get_top_usernames, get_top_passwords, get_top_ips, get_top_commands,
     get_attempts_by_hour, get_total_login_attempts,
-    get_total_successful_logins, get_total_failed_logins
+    get_total_successful_logins, get_total_failed_logins,
+    get_top_countries
 )
 from config import DB_HOST, DB_USER, DB_PASSWORD, DB_NAME
 
@@ -48,7 +49,10 @@ def create_heatmap(db):
     HeatMap(points).add_to(m)
     return m._repr_html_()
 
-
+@app.route("/last-updated")
+def last_updated():
+    with open("last_updated.txt") as f:
+        return f.read()
 
 @app.route("/")
 def home():
@@ -63,6 +67,7 @@ def home():
         passwords=get_top_passwords(db),
         ips=get_top_ips(db),
         commands=get_top_commands(db),
+        countries=get_top_countries(db),
         hours=get_attempts_by_hour(db),
         total_attempts=get_total_login_attempts(db)[0][0],
         total_success=get_total_successful_logins(db)[0][0],
