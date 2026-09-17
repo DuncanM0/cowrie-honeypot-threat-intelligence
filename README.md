@@ -2,6 +2,8 @@
 
 This project runs a Cowrie SSH/Telnet honeypot on an Oracle Cloud VPS (Ubuntu 24.04 in Docker) to capture and analyze automated brute-force attacks and malicious commands.
 
+INSTEAD OF RUNNING THE PY FILES INDIVIDUALLY USE BAT FILE 
+
 It includes a Python pipeline to pull logs from the VPS into a MySQL database, along with a Flask web dashboard to view top attacker IPs, credentials tried, and commands run.
 
 ## Project Structure
@@ -17,12 +19,15 @@ It includes a Python pipeline to pull logs from the VPS into a MySQL database, a
 ## Setup
 
 1. **Database:** Import `honeypot_db.sql` into MYSQL inside of Xampp:
+   ```bash
    just run the sql file insdie of phpmyadmin in xampp at localhost
+   ```
 
 2. **Environment Variables:** Copy `.env.example` to `.env` and fill in your details:
    ```bash
    cp .env.example .env
    ```
+
 
 3. **Log Pipeline:** Run the pipeline script to fetch logs and store them in MySQL:
    ```bash
@@ -34,3 +39,4 @@ It includes a Python pipeline to pull logs from the VPS into a MySQL database, a
    ```bash
    cd analysis
    python app.py
+
