@@ -16,10 +16,8 @@ It includes a Python pipeline to pull logs from the VPS into a MySQL database, a
 
 ## Setup
 
-1. **Database:** Import `honeypot_db.sql` into MySQL:
-   ```bash
-   mysql -u root -p < honeypot_db.sql
-   ```
+1. **Database:** Import `honeypot_db.sql` into MYSQL inside of Xampp:
+   just run the sql file insdie of phpmyadmin in xampp at localhost
 
 2. **Environment Variables:** Copy `.env.example` to `.env` and fill in your details:
    ```bash

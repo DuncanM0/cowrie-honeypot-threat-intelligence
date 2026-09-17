@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="refresh" content="60">
     <title>Honeypot Dashboard</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -11,30 +10,45 @@
             background: #0d1117;
             color: #c9d1d9;
             font-family: 'Segoe UI', system-ui, sans-serif;
-            padding: 40px;
+            padding: 30px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            border-bottom: 1px solid #30363d;
+            padding-bottom: 16px;
         }
 
         h1 {
             color: #58a6ff;
-            margin-bottom: 8px;
-            font-size: 28px;
+            font-size: 26px;
         }
 
-        h2 {
-            text-align: center;
+        #last-updated {
+            color: #8b949e;
+            font-size: 13px;
+            background: #161b22;
+            padding: 6px 12px;
+            border-radius: 6px;
+            border: 1px solid #30363d;
         }
 
         .stats-row {
             display: flex;
             gap: 16px;
-            margin-bottom: 40px;
+            margin-bottom: 24px;
         }
 
         .stat-card {
             background: #161b22;
             border: 1px solid #30363d;
             border-radius: 8px;
-            padding: 20px 28px;
+            padding: 20px 24px;
             flex: 1;
         }
 
@@ -46,7 +60,7 @@
 
         .stat-card .label {
             color: #8b949e;
-            font-size: 13px;
+            font-size: 12px;
             margin-top: 4px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
@@ -65,63 +79,66 @@
             background: #161b22;
             border: 1px solid #30363d;
             border-radius: 8px;
-            padding: 24px;
+            padding: 20px;
+            overflow: hidden;
+        }
+
+        .panel.full-width {
+            grid-column: span 2;
         }
 
         .panel h2 {
-            font-size: 16px;
+            font-size: 15px;
             color: #c9d1d9;
-            margin-bottom: 16px;
-            border-bottom: 1px solid #30363d;
-            padding-bottom: 12px;
+            margin-bottom: 14px;
+            border-bottom: 1px solid #21262d;
+            padding-bottom: 10px;
+            text-align: left;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
+            table-layout: fixed;
         }
 
         td {
-            padding: 8px 0;
-            font-size: 14px;
+            padding: 10px 8px;
+            font-size: 13px;
             border-bottom: 1px solid #21262d;
+            word-break: break-all;
         }
 
         td:first-child {
             color: #c9d1d9;
             font-family: 'Consolas', monospace;
+            padding-right: 16px;
         }
 
         td:last-child {
             text-align: right;
             color: #58a6ff;
             font-weight: 600;
-        }
-
-        .commands td:first-child {
-            max-width: 400px;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            width: 80px;
             white-space: nowrap;
         }
 
-        .map-container {
-            margin: 0 auto;
-            padding: 0;
-            width: 1200px;
-            max-width: 100%;
-            height: 800px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+        /* Map styling overrides */
+        .map-card {
+            margin-bottom: 24px;
         }
 
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
+        .map-container {
+            width: 90%;
+            height: 650px;
+            margin-left: 65px;
+            border-radius: 6px;
+            overflow: hidden;
+            position: relative;
+            
         }
+
+
 
     </style>
 </head>
@@ -147,10 +164,11 @@
         </div>
     </div>
 
-    <h2>Attack Locations</h2>
-
-    <div class="map-container">
-        {{ map_html | safe }}
+    <div class="panel map-card">
+        <h2>Attack Locations</h2>
+        <div class="map-container">
+            {{ map_html | safe }}
+        </div>
     </div>
 
     <div class="panels">
@@ -160,6 +178,8 @@
             <table>
                 {% for username, count in usernames %}
                 <tr><td>{{ username }}</td><td>{{ count }}</td></tr>
+                {% else %}
+                <tr><td colspan="2" style="color: #8b949e; text-align: center;">No usernames recorded</td></tr>
                 {% endfor %}
             </table>
         </div>
@@ -169,6 +189,8 @@
             <table>
                 {% for password, count in passwords %}
                 <tr><td>{{ password }}</td><td>{{ count }}</td></tr>
+                {% else %}
+                <tr><td colspan="2" style="color: #8b949e; text-align: center;">No passwords recorded</td></tr>
                 {% endfor %}
             </table>
         </div>
@@ -178,27 +200,30 @@
             <table>
                 {% for ip, count in ips %}
                 <tr><td>{{ ip }}</td><td>{{ count }}</td></tr>
+                {% else %}
+                <tr><td colspan="2" style="color: #8b949e; text-align: center;">No IPs recorded</td></tr>
                 {% endfor %}
             </table>
         </div>
 
         <div class="panel">
-            <h2>Top 25 Countries</h2>
+            <h2>Top Countries</h2>
             <table>
                 {% for country, count in countries %}
-                <tr><td>{{ country }}</td><td>{{ count }}</td></tr>
+                <tr><td>{{ country or 'Unknown' }}</td><td>{{ count }}</td></tr>
+                {% else %}
+                <tr><td colspan="2" style="color: #8b949e; text-align: center;">No countries recorded</td></tr>
                 {% endfor %}
             </table>
         </div>
 
-        <!-- SAFE HOURLY METRICS PANEL -->
-        <div class="panel" style="grid-column: span 2;">
+        <div class="panel full-width">
             <h2>Attempts by Hour (UTC)</h2>
             <table>
                 {% if hours %}
                     {% for hour, count in hours %}
                     <tr>
-                        <td>{{ "%02d"|format(hour) }}:00</td>
+                        <td>{{ "%02d"|format(hour) }}:00 UTC</td>
                         <td>{{ count }}</td>
                     </tr>
                     {% endfor %}
@@ -210,11 +235,13 @@
             </table>
         </div>
 
-        <div class="panel" style="grid-column: span 2;">
+        <div class="panel full-width">
             <h2>Top Commands</h2>
-            <table class="commands">
+            <table>
                 {% for command, count in commands %}
                 <tr><td>{{ command }}</td><td>{{ count }}</td></tr>
+                {% else %}
+                <tr><td colspan="2" style="color: #8b949e; text-align: center;">No commands recorded</td></tr>
                 {% endfor %}
             </table>
         </div>
@@ -229,6 +256,12 @@ fetch("/last-updated").then(r => r.text()).then(t => lastTime = new Date(t));
 setInterval(() => {
     if (!lastTime) return;
     let seconds = Math.floor((new Date() - lastTime) / 1000);
+
+    if (seconds >= 300) {
+        location.reload();
+        return;
+    }
+
     document.getElementById("last-updated").textContent = "Last Updated " + seconds + "s ago";
 }, 1000);
 
