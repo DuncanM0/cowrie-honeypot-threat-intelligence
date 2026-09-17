@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="refresh" content="60">
     <title>Honeypot Dashboard</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -146,8 +147,6 @@
         </div>
     </div>
 
-    
-
     <h2>Attack Locations</h2>
 
     <div class="map-container">
@@ -164,7 +163,6 @@
                 {% endfor %}
             </table>
         </div>
-        
 
         <div class="panel">
             <h2>Top Passwords</h2>
@@ -185,7 +183,7 @@
         </div>
 
         <div class="panel">
-            <h2>Top Countries</h2>
+            <h2>Top 25 Countries</h2>
             <table>
                 {% for country, count in countries %}
                 <tr><td>{{ country }}</td><td>{{ count }}</td></tr>
@@ -193,12 +191,22 @@
             </table>
         </div>
 
-        <div class="panel">
+        <!-- SAFE HOURLY METRICS PANEL -->
+        <div class="panel" style="grid-column: span 2;">
             <h2>Attempts by Hour (UTC)</h2>
             <table>
-                {% for hour, count in hours %}
-                <tr><td>{{ hour }}:00</td><td>{{ count }}</td></tr>
-                {% endfor %}
+                {% if hours %}
+                    {% for hour, count in hours %}
+                    <tr>
+                        <td>{{ "%02d"|format(hour) }}:00</td>
+                        <td>{{ count }}</td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="2" style="text-align: center; color: #8b949e;">No hourly attack data recorded yet.</td>
+                    </tr>
+                {% endif %}
             </table>
         </div>
 
@@ -213,7 +221,6 @@
 
     </div>
 
-
 <script>
 let lastTime;
 
@@ -223,16 +230,11 @@ setInterval(() => {
     if (!lastTime) return;
     let seconds = Math.floor((new Date() - lastTime) / 1000);
     document.getElementById("last-updated").textContent = "Last Updated " + seconds + "s ago";
-
-    if (seconds >= 300) {
-        location.reload();
-    }
 }, 1000);
 
 setInterval(() => {
     fetch("/last-updated").then(r => r.text()).then(t => lastTime = new Date(t));
 }, 10000);
-
 </script>
 
 </body>

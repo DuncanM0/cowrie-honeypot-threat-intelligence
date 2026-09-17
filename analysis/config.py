@@ -2,7 +2,6 @@ import os
 from pathlib import Path
 
 def load_env():
-    """Load key-value pairs from .env into os.environ if present."""
     base_dir = Path(__file__).resolve().parent
     env_paths = [base_dir / ".env", base_dir.parent / ".env"]
     

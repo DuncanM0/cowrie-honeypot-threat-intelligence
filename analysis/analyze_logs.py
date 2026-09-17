@@ -50,7 +50,6 @@ def insert_login(db, data):
         (data["session"], data["ip"], data["time"], data["username"], data["password"], data["status"],  data["country"], data["city"], data["lat"], data["lon"])
         )
     cursor.close()
-    db.commit()
 
 
 def insert_command(db, data):
@@ -60,7 +59,6 @@ def insert_command(db, data):
         (data["session"], data["ip"], data["time"], data["command"])
         )
     cursor.close()
-    db.commit()
 
 
 

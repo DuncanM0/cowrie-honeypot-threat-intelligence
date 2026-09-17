@@ -1,3 +1,4 @@
+import os
 import subprocess
 import time
 import mysql.connector
@@ -13,6 +14,20 @@ from config import (
 )
 
 geo_cache = {}
+OFFSET_FILE = "last_line.txt"
+
+def get_last_offset():
+    if os.path.exists(OFFSET_FILE):
+        with open(OFFSET_FILE, "r") as f:
+            content = f.read().strip()
+            if content.isdigit():
+                return int(content)
+    return 0
+
+def save_last_offset(line_number):
+    with open(OFFSET_FILE, "w") as f:
+        f.write(str(line_number))
+
 
 def fetch_latest_log():
     print("Fetching latest log from VPS...")
@@ -55,42 +70,63 @@ def parse_and_store():
         database=DB_NAME
     )
 
-    with open(LOCAL_PATH) as f:
-        for line in f:
-            event = json.loads(line)
-            raw_time = event["timestamp"].replace("Z", "")
-            dt = datetime.fromisoformat(raw_time)
-            sql_time = dt.strftime('%Y-%m-%d %H:%M:%S')
+    last_offset = get_last_offset()
+    current_line = 0
 
-            if event["eventid"] in ("cowrie.login.success", "cowrie.login.failed"):
-                geo = get_geoip(event["src_ip"])
-                status = "success" if event["eventid"] == "cowrie.login.success" else "failed"
-                insert_login(db, {
-                    "session": event["session"], "ip": event["src_ip"], "time": sql_time,
-                    "username": event.get("username", ""), "password": event.get("password", ""),
-                    "status": status,
-                    "country" : geo["country"],
-                    "city" : geo["city"],
-                    "lat" : geo["lat"],
-                    "lon" : geo["lon"] 
-                })
-            elif event["eventid"] == "cowrie.command.input":
-                insert_command(db, {
-                    "session": event["session"], "ip": event["src_ip"], "time": sql_time,
-                    "command": event["input"]
-                })
+    if os.path.exists(LOCAL_PATH):
+        with open(LOCAL_PATH) as f:
+            for line in f:
+                current_line += 1
 
+                if current_line <= last_offset:
+                    continue
+
+                event = json.loads(line)
+                raw_time = event["timestamp"].replace("Z", "")
+                dt = datetime.fromisoformat(raw_time)
+                sql_time = dt.strftime('%Y-%m-%d %H:%M:%S')
+
+                if event["eventid"] in ("cowrie.login.success", "cowrie.login.failed"):
+                    geo = get_geoip(event["src_ip"])
+                    status = "success" if event["eventid"] == "cowrie.login.success" else "failed"
+                    insert_login(db, {
+                        "session": event["session"], "ip": event["src_ip"], "time": sql_time,
+                        "username": event.get("username", ""), "password": event.get("password", ""),
+                        "status": status,
+                        "country" : geo["country"],
+                        "city" : geo["city"],
+                        "lat" : geo["lat"],
+                        "lon" : geo["lon"] 
+                    })
+                elif event["eventid"] == "cowrie.command.input":
+                    insert_command(db, {
+                        "session": event["session"], "ip": event["src_ip"], "time": sql_time,
+                        "command": event["input"]
+                    })
+    db.commit()
     db.close()
+
+    print("saving Offset")
+
+    if current_line < last_offset:
+        save_last_offset(current_line)
+    else:
+        save_last_offset(current_line)
+
+
     print("Data inserted into MySQL.")
 
 if __name__ == "__main__":
-    while True:
-        fetch_latest_log()
-        parse_and_store()
+    try:
+        while True:
+            fetch_latest_log()
+            parse_and_store()
 
-        with open("last_updated.txt", "w") as f:
-            f.write(datetime.now().isoformat())
-        print("Recoring Time ... \n")
-        
-        print("Sleeping for 5 minutes...\n")
-        time.sleep(300)  # 5 mins 
+            with open("last_updated.txt", "w") as f:
+                f.write(datetime.now().isoformat())
+            print("Recoring Time ... \n")
+            
+            print("Sleeping for 5 minutes...\n")
+            time.sleep(300)  # 5 mins 
+    except KeyboardInterrupt:
+        print("\n[!] Ctrl+C detected. Shutting down ...")
