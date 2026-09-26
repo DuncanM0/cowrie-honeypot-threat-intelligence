@@ -14,3 +14,13 @@ cowrie-data/
 # Python
 __pycache__/
 *.pyc
+
+# Runtime state files
+analysis/last_line.txt
+analysis/last_updated.txt
+
+# OS junk
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

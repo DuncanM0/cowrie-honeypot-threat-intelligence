@@ -2,12 +2,12 @@
 
 This project runs a Cowrie SSH/Telnet honeypot on an Oracle Cloud VPS (Ubuntu 24.04 in Docker) to capture and analyze automated brute-force attacks and malicious commands.
 
-INSTEAD OF RUNNING THE PY FILES INDIVIDUALLY USE BAT FILE 
-
 It includes a Python pipeline to pull logs from the VPS into a MySQL database, along with a Flask web dashboard to view top attacker IPs, credentials tried, and commands run.
 
 ## Project Structure
 
+- `analysis/launcher.py` - Starts XAMPP, waits for MySQL, runs the pipeline and dashboard, and opens the app in a desktop window
+- `analysis/run_honeypot.bat` - One-click entry point that runs `launcher.py`
 - `analysis/app.py` - Flask web dashboard for viewing attack statistics
 - `analysis/pipeline.py` - Automated script to fetch logs via SCP and store them in MySQL
 - `analysis/analyze_logs.py` - Data parsing, SQL queries, and Matplotlib graphs
@@ -18,25 +18,13 @@ It includes a Python pipeline to pull logs from the VPS into a MySQL database, a
 
 ## Setup
 
-1. **Database:** Import `honeypot_db.sql` into MYSQL inside of Xampp:
-   ```bash
-   just run the sql file insdie of phpmyadmin in xampp at localhost
-   ```
+1. **Database:** Import `honeypot_db.sql` into MySQL via phpMyAdmin inside XAMPP (`http://localhost/phpmyadmin`).
 
 2. **Environment Variables:** Copy `.env.example` to `.env` and fill in your details:
-   ```bash
+```bash
    cp .env.example .env
-   ```
+```
 
+3. **Run everything:** Double-click `run_honeypot.bat` (or run `analysis/launcher.py` directly). This starts XAMPP, waits for MySQL to come up, runs the log pipeline, starts the Flask dashboard, and opens it in a desktop window automatically.
 
-3. **Log Pipeline:** Run the pipeline script to fetch logs and store them in MySQL:
-   ```bash
-   cd analysis
-   python pipeline.py
-   ```
-
-4. **Web Dashboard:** Start the Flask app:
-   ```bash
-   cd analysis
-   python app.py
-
+   > `pipeline.py` and `app.py` can still be run individually for debugging, but `run_honeypot.bat` is the intended way to start the full project.
