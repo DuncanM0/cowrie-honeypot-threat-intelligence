@@ -250,14 +250,16 @@
 
 <script>
 let lastTime;
+let reloading = false;
 
 fetch("/last-updated").then(r => r.text()).then(t => lastTime = new Date(t));
 
 setInterval(() => {
-    if (!lastTime) return;
+    if (!lastTime || reloading) return;
     let seconds = Math.floor((new Date() - lastTime) / 1000);
 
     if (seconds >= 300) {
+        reloading = true;
         location.reload();
         return;
     }
@@ -266,7 +268,7 @@ setInterval(() => {
 }, 1000);
 
 setInterval(() => {
-    fetch("/last-updated").then(r => r.text()).then(t => lastTime = new Date(t));
+    if (!reloading) fetch("/last-updated").then(r => r.text()).then(t => lastTime = new Date(t));
 }, 10000);
 </script>
 
