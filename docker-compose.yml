@@ -1,11 +1,26 @@
-version: "3"
+version: "3.8"
 services:
   cowrie:
     image: cowrie/cowrie:latest
     restart: unless-stopped
     ports:
-      - "22:2222"     # public port 22 -> cowrie's internal fake ssh
+      - "22:2222"     # public port 22 cowrie's internal fake ssh
       - "2223:2223"   # telnet
     volumes:
       - ./cowrie-log:/cowrie/cowrie-git/var/log/cowrie
       - ./cowrie-data:/cowrie/cowrie-git/var/lib/cowrie
+
+  db:
+    image: mysql:8.0
+    restart: unless-stopped
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./honeypot_db.sql:/docker-entrypoint-initdb.d/init.sql:ro
+
+volumes:
+  db_data:
