@@ -6,7 +6,7 @@ An end-to-end threat intelligence system that runs a **Cowrie SSH/Telnet honeypo
 
 ##  Architecture & How It Works
 
-```
+
 flowchart TD
 
 subgraph group_capture["Attack Capture"]
