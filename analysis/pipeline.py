@@ -1,5 +1,4 @@
 import os
-import subprocess
 import time
 import mysql.connector
 import requests
@@ -9,7 +8,7 @@ from analyze_logs import (
 import json
 from datetime import datetime
 from config import (
-    SSH_KEY, VPS_PORT, REMOTE_PATH, LOCAL_PATH,
+    LOCAL_PATH,
     DB_HOST, DB_USER, DB_PASSWORD, DB_NAME
 )
 
@@ -28,22 +27,9 @@ def save_last_offset(line_number):
     with open(OFFSET_FILE, "w") as f:
         f.write(str(line_number))
 
-
-def fetch_latest_log():
-    print("Fetching latest log from VPS...")
-    subprocess.run([
-        "scp",
-        "-i", SSH_KEY,
-        "-P", VPS_PORT,
-        REMOTE_PATH,
-        LOCAL_PATH
-    ])
-    print("Fetch complete.")
-
 def get_geoip(ip):
     if ip in geo_cache:
         return geo_cache[ip]
-
     try:
         response = requests.get(f"http://ip-api.com/json/{ip}", timeout=3)
         data = response.json()
@@ -58,7 +44,6 @@ def get_geoip(ip):
             geo = {"country": None, "city": None, "lat": None, "lon": None}
     except requests.RequestException:
         geo = {"country": None, "city": None, "lat": None, "lon": None}
-
     geo_cache[ip] = geo
     return geo
 
@@ -77,7 +62,6 @@ def parse_and_store():
         with open(LOCAL_PATH) as f:
             for line in f:
                 current_line += 1
-
                 if current_line <= last_offset:
                     continue
 
@@ -93,40 +77,34 @@ def parse_and_store():
                         "session": event["session"], "ip": event["src_ip"], "time": sql_time,
                         "username": event.get("username", ""), "password": event.get("password", ""),
                         "status": status,
-                        "country" : geo["country"],
-                        "city" : geo["city"],
-                        "lat" : geo["lat"],
-                        "lon" : geo["lon"] 
+                        "country": geo["country"],
+                        "city": geo["city"],
+                        "lat": geo["lat"],
+                        "lon": geo["lon"]
                     })
                 elif event["eventid"] == "cowrie.command.input":
                     insert_command(db, {
                         "session": event["session"], "ip": event["src_ip"], "time": sql_time,
                         "command": event["input"]
                     })
+    else:
+        print(f"WARNING: log file not found at {LOCAL_PATH}")
+
     db.commit()
     db.close()
 
     print("saving Offset")
-
-    if current_line < last_offset:
-        save_last_offset(current_line)
-    else:
-        save_last_offset(current_line)
-
-
+    save_last_offset(current_line)
     print("Data inserted into MySQL.")
 
 if __name__ == "__main__":
     try:
         while True:
-            fetch_latest_log()
             parse_and_store()
-
             with open("last_updated.txt", "w") as f:
                 f.write(datetime.now().isoformat())
-            print("Recoring Time ... \n")
-            
+            print("Recording time...\n")
             print("Sleeping for 5 minutes...\n")
-            time.sleep(300)  # 5 mins 
+            time.sleep(300)
     except KeyboardInterrupt:
         print("\n[!] Ctrl+C detected. Shutting down ...")
