@@ -1,16 +1,20 @@
 import atexit
 import webview
-import os
 import socket
 import subprocess
+import os
 import time
 from contextlib import closing
 
 CREATE_NO_WINDOW = 0x08000000
 
-XAMPP_SCRIPTS = [r"C:\xampp\apache_start.bat", r"C:\xampp\mysql_start.bat"]
-                 
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+COMPOSE_DIR = os.path.abspath(os.path.join(SCRIPT_DIR, ".."))
+
+r"""
+XAMPP_SCRIPTS = [r"C:\xampp\apache_start.bat", r"C:\xampp\mysql_start.bat"]                
 XAMPP_STOP_SCRIPTS = [r"C:\xampp\apache_stop.bat", r"C:\xampp\mysql_stop.bat"]
+"""
 
 processes = []
    
@@ -21,10 +25,20 @@ def check_socket(host, port):
         else:
             return bool (0)
 
+def start_docker_db():
+    subprocess.run(
+        ["docker", "compose", "up", "-d", "db"],
+        cwd=COMPOSE_DIR,
+        creationflags=CREATE_NO_WINDOW,
+        check=True
+    )
+
+r"""
 def start_xampp():
     for file in XAMPP_SCRIPTS:
         p = subprocess.Popen(file, creationflags=CREATE_NO_WINDOW)
         processes.append(p)
+"""
 
 def wait_for_port(host, port, interval=1.0):
     while not check_socket(host, port):
@@ -37,10 +51,9 @@ def start_app():
     processes.extend([p1,p2])
 
 def stop_all_processes():
-    for file in XAMPP_STOP_SCRIPTS:
-        subprocess.Popen(file, creationflags=CREATE_NO_WINDOW)
-
-    time.sleep(1)
+    #for file in XAMPP_STOP_SCRIPTS:
+    #    subprocess.Popen(file, creationflags=CREATE_NO_WINDOW)
+    #time.sleep(1)
 
     print("Stopping all processes now ... ")
     for p in processes:
@@ -55,8 +68,8 @@ def stop_all_processes():
 
 def main():
     atexit.register(stop_all_processes)
-    start_xampp()
-
+    #start_xampp()
+    start_docker_db()
     wait_for_port("localhost", 3306, interval=1.5)
     print("MySQL is up, launching pipeline and app")
 
