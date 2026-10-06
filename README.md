@@ -6,78 +6,7 @@ An end-to-end threat intelligence system that runs a **Cowrie SSH/Telnet honeypo
 
 ##  Architecture & How It Works
 
-
-flowchart TD
-
-subgraph group_capture["Attack Capture"]
-  node_cowrie["Cowrie Honeypot<br/>[docker-compose.yml]"]
-  node_remote_log["Remote JSON Logs"]
-end
-
-subgraph group_ingestion["Log Ingestion"]
-  node_pipeline["Polling Pipeline<br/>[pipeline.py]"]
-  node_offset_state["Offset State<br/>[last_line.txt]"]
-  node_event_parser["Event Parser<br/>[analyze_logs.py]"]
-end
-
-subgraph group_persistence["Data Persistence"]
-  node_mysql[("MySQL Database<br/>[honeypot_db.sql]")]
-end
-
-subgraph group_intelligence["Threat Analytics"]
-  node_analytics_queries["Analytics Queries<br/>[analyze_logs.py]"]
-end
-
-subgraph group_presentation["Web Presentation"]
-  node_dashboard_route["Dashboard Route<br/>[app.py]"]
-  node_heatmap["Heatmap Builder<br/>[app.py]"]
-  node_dashboard_template["Dashboard Template<br/>[index.html]"]
-  node_updated_state["Update Timestamp<br/>[last_updated.txt]"]
-end
-
-node_attacker(("Attacker"))
-node_geoip["GeoIP Service"]
-
-node_attacker -->|"sends attacks"| node_cowrie
-node_cowrie -->|"writes events"| node_remote_log
-node_pipeline -->|"fetches via SCP"| node_remote_log
-node_pipeline -->|"reads and writes"| node_offset_state
-node_pipeline -->|"parses events"| node_event_parser
-node_pipeline -.->|"enriches IPs"| node_geoip
-node_event_parser -->|"inserts records"| node_mysql
-node_pipeline -->|"opens connection"| node_mysql
-node_analytics_queries -->|"queries records"| node_mysql
-node_dashboard_route -->|"requests metrics"| node_analytics_queries
-node_dashboard_route -->|"builds map"| node_heatmap
-node_heatmap -->|"reads coordinates"| node_mysql
-node_dashboard_route -->|"renders dashboard"| node_dashboard_template
-node_pipeline -->|"writes timestamp"| node_updated_state
-node_dashboard_route -->|"reads timestamp"| node_updated_state
-
-click node_cowrie "https://github.com/duncanm0/cowrie-honeypot-threat-intelligence/blob/main/docker-compose.yml"
-click node_pipeline "https://github.com/duncanm0/cowrie-honeypot-threat-intelligence/blob/main/analysis/pipeline.py"
-click node_offset_state "https://github.com/duncanm0/cowrie-honeypot-threat-intelligence/blob/main/analysis/last_line.txt"
-click node_event_parser "https://github.com/duncanm0/cowrie-honeypot-threat-intelligence/blob/main/analysis/analyze_logs.py"
-click node_mysql "https://github.com/duncanm0/cowrie-honeypot-threat-intelligence/blob/main/honeypot_db.sql"
-click node_analytics_queries "https://github.com/duncanm0/cowrie-honeypot-threat-intelligence/blob/main/analysis/analyze_logs.py"
-click node_dashboard_route "https://github.com/duncanm0/cowrie-honeypot-threat-intelligence/blob/main/analysis/app.py"
-click node_heatmap "https://github.com/duncanm0/cowrie-honeypot-threat-intelligence/blob/main/analysis/app.py"
-click node_dashboard_template "https://github.com/duncanm0/cowrie-honeypot-threat-intelligence/blob/main/analysis/templates/index.html"
-click node_updated_state "https://github.com/duncanm0/cowrie-honeypot-threat-intelligence/blob/main/analysis/last_updated.txt"
-
-classDef toneNeutral fill:#f8fafc,stroke:#334155,stroke-width:1.5px,color:#0f172a
-classDef toneBlue fill:#dbeafe,stroke:#2563eb,stroke-width:1.5px,color:#172554
-classDef toneAmber fill:#fef3c7,stroke:#d97706,stroke-width:1.5px,color:#78350f
-classDef toneMint fill:#dcfce7,stroke:#16a34a,stroke-width:1.5px,color:#14532d
-classDef toneRose fill:#ffe4e6,stroke:#e11d48,stroke-width:1.5px,color:#881337
-classDef toneIndigo fill:#e0e7ff,stroke:#4f46e5,stroke-width:1.5px,color:#312e81
-classDef toneTeal fill:#ccfbf1,stroke:#0f766e,stroke-width:1.5px,color:#134e4a
-class node_cowrie,node_remote_log toneBlue
-class node_pipeline,node_offset_state,node_event_parser toneAmber
-class node_mysql toneMint
-class node_analytics_queries toneRose
-class node_dashboard_route,node_heatmap,node_dashboard_template,node_updated_state,node_attacker,node_geoip toneIndigo
-```
+[![Architecture diagram of duncanm0/cowrie-honeypot-threat-intelligence](https://gitdiagram.com/duncanm0/cowrie-honeypot-threat-intelligence/diagram.png)](https://gitdiagram.com/duncanm0/cowrie-honeypot-threat-intelligence?utm_source=readme&utm_medium=picture)
 
 1. **Honeypot Container (Oracle Cloud VPS)**: Cowrie runs in Docker on an Oracle Cloud Ubuntu 24.04 VM, listening on public port `22` (forwarded internally to `2222` for fake SSH) and `2223` (Telnet). It logs all brute-force attempts, credentials, and commands to `cowrie.json`.
 2. **Database Container**: MySQL 8.0 runs via Docker Compose on the same VM (`docker compose up -d db`). Schema initialization (`honeypot_db.sql`) creates tables for `login_attempts` (with IP geolocation fields) and `command_logs`.
